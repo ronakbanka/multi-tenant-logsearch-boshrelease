@@ -1,0 +1,4 @@
+---
+name: cf_cli
+files:
+  - cf_cli/cf-linux-amd64.tgz

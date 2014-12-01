@@ -1,0 +1,4 @@
+[submodule "logsearch"]
+	path = logsearch
+	url = https://github.com/pivotalservices/logsearch-boshrelease.git
+	branch = experiment-mt

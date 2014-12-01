@@ -1,0 +1,5 @@
+set -e -x
+
+mkdir -p ${BOSH_INSTALL_TARGET}/plugins/kibana/_site/app/dashboards
+
+cp -a kibana-dashboards/* ${BOSH_INSTALL_TARGET}/plugins/kibana/_site/app/dashboards
