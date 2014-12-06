@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ "$1" == "--help" ]; then
+  echo "USAGE: $0"
+  echo "    This command takes no arguments."
+  echo ""
+  echo "This script creates a bosh release [dev|final]"
+  exit 0
+fi
+
+set -e -x
+
+ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
+WORKSPACE_DIR=$HOME/workspace
+RELEASE_DIR=$ROOT_DIR/logsearch
+RELEASE_VERSION=${RELEASE_VERSION:-17+dev.1}
+PRODUCT_VERSION=18-alpha.14
+STEMCELL_NAME=${STEMCELL_NAME:-bosh-stemcell-2690.3-vsphere-esxi-ubuntu-trusty-go_agent.tgz}
+TILE_REPO=${TILE_REPO:-https://github.com/pivotalservices/pivotal-logsearch-tile.git}
+TILE_DIR=$WORKSPACE_DIR/pivotal-logsearch-tile
+
+if [[ ! -d $TILE_DIR ]]; then
+    git clone $TILE_REPO $TILE_DIR
+fi
+
+if [[ ! -f $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz ]]; then
+  cd $RELEASE_DIR
+  echo Creating a bosh release
+  bosh create release --with-tarball dev_releases/logsearch/logsearch-$RELEASE_VERSION.yml  --force
+  mkdir -p $TILE_DIR/releases
+  cp $RELEASE_DIR/dev_releases/logsearch/logsearch-$RELEASE_VERSION.tgz $TILE_DIR/releases
+  rm -f $RELEASE_DIR/dev_releases/logsearch/logsearch-$RELEASE_VERSION.tgz
+fi
+
+if [[ ! -f $TILE_DIR/stemcells/$STEMCELL_NAME ]]; then
+  mkdir -p $TILE_DIR/stemcells
+  cd $TILE_DIR/stemcells
+    bosh download public stemcell $STEMCELL_NAME
+fi
+
+cd $TILE_DIR
+rm -f logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal
+MD5=$(md5 -q $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz)
+echo "Replacing RELEASE_MD5 with: ${MD5}"
+cat metadata/p_logsearch-dev.yml.erb | sed "s/RELEASE_MD5/${MD5}/" > metadata/p_logsearch-dev.yml
+zip -r logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb .DS_Store content_migrations/.DS_Store metadata/.DS_Store releases/.DS_Store stemcells/.DS_Store
+
