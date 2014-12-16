@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+set -x
+
+ES_URI="<%= p('elasticsearch.host') %>"
+ES_PORT="<%= p('elasticsearch.port') %>"
+LOGFILE=/var/vcap/sys/log/elasticsearch_index_mgmt/remove_indices.stdout.log
+DAYS="<%= p('elasticsearch_index_mgmt.days_old') %>"
+PASTDATE="$(date "+"%Y.%m.%d"" -d "$DAYS days ago")"
+TENANTS="<%= p('tenants', '').to_s.split(',') %>"
+
+# Remove default tenant index
+remove_index "logstash-default-$PASTDATE"
+
+# Remove remaining tenant indices
+for x in $TENANTS; do
+  tenant=$(echo $x | tr -d "[],\"")
+  org=$(echo $tenant | cut -d':' -f1)
+  space=$(echo $tenant | cut -d':' -f2)
+  remove_index "logstash-$org:$space-$PASTDATE"
+done
+
+remove_index() {
+  echo "Removing index: $1"
+  /var/vcap/jobs/elasticsearch_index_mgmt/bin/elasticsearch-remove-old-indices.sh -e "${ES_URI}:${ES_PORT}" -i 0 -g "$1" -o "${LOGFILE}"
+}

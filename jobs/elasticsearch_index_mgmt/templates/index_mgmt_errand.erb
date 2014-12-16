@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+set -x
+
+LOGDIR=/var/vcap/sys/log/elasticsearch_index_mgmt
+
+mkdir -p "$LOGDIR"
+chown vcap:vcap "$LOGDIR"
+
+echo "Running elasticsearch index management errand..."
+
+EXITSTATUS=0
+
+echo "Elasticsearch index management enabled"
+echo "00 0 * * * root bash -c 'exec /var/vcap/jobs/elasticsearch_index_mgmt/bin/remove_indices.cron >> $LOGDIR/remove_indices.stdout.log 2>> $LOGDIR/remove_indices.stderr.log'" > /etc/cron.d/30-vcap-elasticsearch_index_mgmt
+touch /etc/cron.d
+echo "Remove old elasticsearch indices crontab installed"
+exit $EXITSTATUS

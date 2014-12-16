@@ -1,0 +1,28 @@
+---
+name: elasticsearch_index_mgmt
+
+packages:
+  - cf_cli
+
+templates:
+  index_mgmt_errand.erb: bin/run
+  elasticsearch-remove-old-indices.sh: bin/elasticsearch-remove-old-indices.sh
+  remove_indices.cron.erb: bin/remove_indices.cron
+
+properties:
+  elasticsearch.host:
+    description: IP / DNS of elasticsearch http endpoint
+  elasticsearch.port:
+    description: Port of elasticsearch http endpoint
+    default: 9200
+  elasticsearch_index_mgmt.enabled:
+    default: false
+  elasticsearch_index_mgmt.cron_schedule:
+    description: "How often you want to prune your indices. Default is everyday at midnight."
+    default: "00 0 * * *"
+  elasticsearch_index_mgmt.days_old:
+    description: "The number of days back you want to purge"
+    default: 30
+  tenants:
+    description: "A comma-delimitted string of logical tenants in org:space format, e.g.'test1:development, test2:development'"
+    default: ""
