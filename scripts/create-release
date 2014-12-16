@@ -14,7 +14,7 @@ ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
 WORKSPACE_DIR=$HOME/workspace
 RELEASE_DIR=$ROOT_DIR/logsearch
 RELEASE_VERSION=${RELEASE_VERSION:-17+dev.1}
-PRODUCT_VERSION=18-alpha.14
+PRODUCT_VERSION=18-alpha.15
 STEMCELL_NAME=${STEMCELL_NAME:-bosh-stemcell-2690.3-vsphere-esxi-ubuntu-trusty-go_agent.tgz}
 TILE_REPO=${TILE_REPO:-https://github.com/pivotalservices/pivotal-logsearch-tile.git}
 TILE_DIR=$WORKSPACE_DIR/pivotal-logsearch-tile
@@ -43,5 +43,5 @@ rm -f logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal
 MD5=$(md5 -q $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz)
 echo "Replacing RELEASE_MD5 with: ${MD5}"
 cat metadata/p_logsearch-dev.yml.erb | sed "s/RELEASE_MD5/${MD5}/" > metadata/p_logsearch-dev.yml
-zip -r logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb .DS_Store content_migrations/.DS_Store metadata/.DS_Store releases/.DS_Store stemcells/.DS_Store
+zip -r logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb -i "content_migrations/*" -i "metadata/*" -i "releases/*" -i "stemcells/*"
 
