@@ -1,23 +1,86 @@
 #!/bin/bash
 
+set -e
+
+usage()
+{
+cat << EOF
+
+This script creates a bosh dev release.
+
+
+USAGE: $0 [OPTIONS]
+
+OPTIONS:
+  -h    Show this message
+  -w    Workspace directory (default: $WORKSPACE_DIR)
+  -r    BOSH release version (default: $RELEASE_VERSION)
+  -v    Product tile release version (default: $PRODUCT_VERSION)
+
+FLAGS:
+  --show   Show current release and product versions
+
+EXAMPLES:
+
+  $0 -w ~/workspace -r '17+dev.28' -v '18-alpha.44'
+
+EOF
+}
+
 if [ "$1" == "--help" ]; then
-  echo "USAGE: $0"
-  echo "    This command takes no arguments."
-  echo ""
-  echo "This script creates a bosh release [dev|final]"
+  usage
   exit 0
 fi
 
-set -e -x
-
-ROOT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
-WORKSPACE_DIR=$HOME/workspace
-RELEASE_DIR=$ROOT_DIR/logsearch
-RELEASE_VERSION=${RELEASE_VERSION:-17+dev.1}
-PRODUCT_VERSION=18-alpha.15
+ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
+WORKSPACE_DIR=${WORKSPACE_DIR:-$HOME/workspace}
+RELEASE_DIR=$ROOT_DIR
+RELEASE_VERSION=${RELEASE_VERSION:-17+dev.28}
+PRODUCT_VERSION=${PRODUCT_VERSION:-18-alpha.44}
 STEMCELL_NAME=${STEMCELL_NAME:-bosh-stemcell-2690.3-vsphere-esxi-ubuntu-trusty-go_agent.tgz}
+
+if  [ "$1" == "--show" ]; then
+  echo "RELEASE_VERSION: ${RELEASE_VERSION}"
+  echo "PRODUCT_VERSION: ${PRODUCT_VERSION}"
+  exit 0
+fi
+
+while getopts ":w:r:v:h" flag
+do
+  case "$flag" in
+    h)
+      usage
+      exit 0
+      ;;
+    w)
+      WORKSPACE_DIR=$OPTARG
+      ;;
+    r)
+      RELEASE_VERSION=$OPTARG
+      ;;
+    v)
+      PRODUCT_VERSION=$OPTARG
+      ;;
+    ?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+TILE_RELEASE_NAME=${TILE_RELEASE_NAME:-logsearch-dev}
+TILE_RELEASE_NUMBER_PREFIX=${TILE_RELEASE_NUMBER_PREFIX:-1.0.0}
+TILE_RELEASE_PREFIX=${TILE_RELEASE_NAME}-${TILE_RELEASE_NUMBER_PREFIX}
+TILE_PRODUCT_NAME=${TILE_RELEASE_PREFIX}.${PRODUCT_VERSION}
 TILE_REPO=${TILE_REPO:-https://github.com/pivotalservices/pivotal-logsearch-tile.git}
 TILE_DIR=$WORKSPACE_DIR/pivotal-logsearch-tile
+
+# If we have errors, show the errors with usage data and exit.
+if [ -n "$ERROR" ]; then
+  echo -e $ERROR
+  usage
+  exit 1
+fi
 
 if [[ ! -d $TILE_DIR ]]; then
     git clone $TILE_REPO $TILE_DIR
@@ -25,23 +88,25 @@ fi
 
 if [[ ! -f $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz ]]; then
   cd $RELEASE_DIR
-  echo Creating a bosh release
-  bosh create release --with-tarball dev_releases/logsearch/logsearch-$RELEASE_VERSION.yml  --force
+  if [[ ! -f $RELEASE_DIR/dev_releases/logsearch/logsearch-$RELEASE_VERSION.tgz ]]; then
+    echo Creating a bosh release
+    bosh create release --with-tarball dev_releases/logsearch/logsearch-$RELEASE_VERSION.yml  --force
+  fi
   mkdir -p $TILE_DIR/releases
+  rm $TILE_DIR/releases/logsearch-*.tgz || true
   cp $RELEASE_DIR/dev_releases/logsearch/logsearch-$RELEASE_VERSION.tgz $TILE_DIR/releases
-  rm -f $RELEASE_DIR/dev_releases/logsearch/logsearch-$RELEASE_VERSION.tgz
 fi
 
 if [[ ! -f $TILE_DIR/stemcells/$STEMCELL_NAME ]]; then
   mkdir -p $TILE_DIR/stemcells
   cd $TILE_DIR/stemcells
-    bosh download public stemcell $STEMCELL_NAME
+  bosh download public stemcell $STEMCELL_NAME
 fi
 
 cd $TILE_DIR
-rm -f logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal
+rm -f ${TILE_RELEASE_NAME}-*.pivotal || true
 MD5=$(md5 -q $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz)
 echo "Replacing RELEASE_MD5 with: ${MD5}"
 cat metadata/p_logsearch-dev.yml.erb | sed "s/RELEASE_MD5/${MD5}/" > metadata/p_logsearch-dev.yml
-zip -r logsearch-dev-1.0.0.$PRODUCT_VERSION.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb -i "content_migrations/*" -i "metadata/*" -i "releases/*" -i "stemcells/*"
-
+zip -r ${TILE_PRODUCT_NAME}.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb -x releases/.gitkeep -x stemcells/.gitkeep -i "content_migrations/*" -i "metadata/*" -i "releases/*" -i "stemcells/*"
+rm -f metadata/p_logsearch-dev.yml
