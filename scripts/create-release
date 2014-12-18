@@ -27,17 +27,17 @@ EXAMPLES:
 EOF
 }
 
+ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
+WORKSPACE_DIR=${WORKSPACE_DIR:-$HOME/workspace}
+RELEASE_DIR=$ROOT_DIR
+RELEASE_VERSION=${RELEASE_VERSION:-17+dev.31}
+PRODUCT_VERSION=${PRODUCT_VERSION:-18-alpha.50}
+STEMCELL_NAME=${STEMCELL_NAME:-bosh-stemcell-2690.3-vsphere-esxi-ubuntu-trusty-go_agent.tgz}
+
 if [ "$1" == "--help" ]; then
   usage
   exit 0
 fi
-
-ROOT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
-WORKSPACE_DIR=${WORKSPACE_DIR:-$HOME/workspace}
-RELEASE_DIR=$ROOT_DIR
-RELEASE_VERSION=${RELEASE_VERSION:-17+dev.28}
-PRODUCT_VERSION=${PRODUCT_VERSION:-18-alpha.44}
-STEMCELL_NAME=${STEMCELL_NAME:-bosh-stemcell-2690.3-vsphere-esxi-ubuntu-trusty-go_agent.tgz}
 
 if  [ "$1" == "--show" ]; then
   echo "RELEASE_VERSION: ${RELEASE_VERSION}"
@@ -105,8 +105,8 @@ fi
 
 cd $TILE_DIR
 rm -f ${TILE_RELEASE_NAME}-*.pivotal || true
+rm -f $TILE_DIR/metadata/p_logsearch-dev.yml || true
 MD5=$(md5 -q $TILE_DIR/releases/logsearch-$RELEASE_VERSION.tgz)
 echo "Replacing RELEASE_MD5 with: ${MD5}"
 cat metadata/p_logsearch-dev.yml.erb | sed "s/RELEASE_MD5/${MD5}/" > metadata/p_logsearch-dev.yml
 zip -r ${TILE_PRODUCT_NAME}.pivotal . -x build.sh -x build-dev.sh -x metadata/p_logsearch-dev.yml.erb -x releases/.gitkeep -x stemcells/.gitkeep -i "content_migrations/*" -i "metadata/*" -i "releases/*" -i "stemcells/*"
-rm -f metadata/p_logsearch-dev.yml
