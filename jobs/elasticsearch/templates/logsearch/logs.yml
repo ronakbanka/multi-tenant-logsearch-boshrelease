@@ -1,4 +1,0 @@
-files:
-  "elasticsearch/requests.log":
-    fields:
-      type: "elasticsearch_request"

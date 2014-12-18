@@ -1,0 +1,25 @@
+#!/bin/bash
+
+cd jobs
+
+ln -fs ../vendor/logsearch-boshrelease/jobs/api
+ln -fs ../vendor/logsearch-boshrelease/jobs/archiver
+ln -fs ../vendor/logsearch-boshrelease/jobs/elasticsearch
+ln -fs ../vendor/logsearch-boshrelease/jobs/ingestor_archiver
+ln -fs ../vendor/logsearch-boshrelease/jobs/ingestor_lumberjack
+ln -fs ../vendor/logsearch-boshrelease/jobs/ingestor_relp
+ln -fs ../vendor/logsearch-boshrelease/jobs/ingestor_syslog
+ln -fs ../vendor/logsearch-boshrelease/jobs/kibana
+ln -fs ../vendor/logsearch-boshrelease/jobs/log_parser
+ln -fs ../vendor/logsearch-boshrelease/jobs/queue
+
+cd ../packages
+
+ln -fs ../vendor/logsearch-boshrelease/packages/elasticsearch
+ln -fs ../vendor/logsearch-boshrelease/packages/java7
+ln -fs ../vendor/logsearch-boshrelease/packages/kibana
+ln -fs ../vendor/logsearch-boshrelease/packages/logstash
+ln -fs ../vendor/logsearch-boshrelease/packages/nginx
+ln -fs ../vendor/logsearch-boshrelease/packages/redis
+
+cd ..

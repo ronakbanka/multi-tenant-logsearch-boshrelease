@@ -1,1 +1,1 @@
-../logsearch/packages/logstash
+../vendor/logsearch-boshrelease/packages/logstash

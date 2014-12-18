@@ -1,1 +1,1 @@
-../logsearch/jobs/ingestor_syslog
+../vendor/logsearch-boshrelease/jobs/ingestor_syslog

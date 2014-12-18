@@ -1,0 +1,10 @@
+---
+name: create_dashboards
+packages:
+- kibana_dashboards
+templates:
+  bin/create_dashboards.erb: bin/create_dashboards
+properties:
+  tenants:
+    description: "A comma-delimitted string of logical tenants in org:space format, e.g.'test1:development, test2:development'"
+    default: ""

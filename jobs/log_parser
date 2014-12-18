@@ -1,1 +1,1 @@
-../logsearch/jobs/log_parser
+../vendor/logsearch-boshrelease/jobs/log_parser

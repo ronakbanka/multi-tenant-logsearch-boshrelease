@@ -1,1 +1,1 @@
-../logsearch/packages/redis
+../vendor/logsearch-boshrelease/packages/redis

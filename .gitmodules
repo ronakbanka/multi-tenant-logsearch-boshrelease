@@ -1,4 +1,7 @@
-[submodule "logsearch"]
-	path = logsearch
+[submodule "vendor/logsearch-boshrelease"]
+	path = vendor/logsearch-boshrelease
 	url = https://github.com/pivotalservices/logsearch-boshrelease.git
 	branch = experiment-mt
+[submodule "vendor/pivotal-logsearch-tile"]
+	path = vendor/pivotal-logsearch-tile
+	url = https://github.com/pivotalservices/pivotal-logsearch-tile.git
