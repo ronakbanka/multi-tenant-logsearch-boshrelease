@@ -131,3 +131,7 @@ logstash/logsearch-filters-common-16.tgz:
   object_id: 6e0815ec-01c5-41ec-ace3-dc9b7216c343
   sha: c111b6c9abf4b439a7e0cdf04552986447298a84
   size: 1552
+elasticsearch/elasticsearch-1.4.0.tar.gz:
+  object_id: 8e269131-0da7-49a5-8880-213c862b000b
+  sha: 728913722bc94dad4cb5e759a362f09dc19ed6fe
+  size: 27730896
